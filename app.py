@@ -11,7 +11,7 @@ st.set_page_config(page_title="Парсер Закупок 44-ФЗ", page_icon="
 st.title("📊 Парсер поставщиков Zakupki.gov.ru")
 st.write("Вставьте ссылки из поиска госзакупок, нажмите кнопку и скачайте готовый отчет с контактами и Telegram-ссылками.")
 
-# Обновленный список полей
+# Список полей для финальной таблицы
 CSV_FIELDS = [
     "Наименование поставщика", "Страна, код", "Адрес места нахождения",
     "Почтовый адрес", "Телефон", "Ссылка на Telegram", "E-mail поставщика", "Статус поставщика",
@@ -86,13 +86,14 @@ def parse_contract_card(page, card_url, contract_title):
 
     tg_link = make_telegram_link(phone)
 
+    # ЗДЕСЬ ИСПРАВЛЕНО (была опечатка с запятой перед card_url)
     return {
         "Наименование поставщика": supplier_name,
         "Страна, код": "Российская Федерация",
         "Адрес места нахождения": "", "Почтовый адрес": "", 
         "Телефон": phone,
         "Ссылка на Telegram": tg_link,
-        "E-mail поставщика": email,  # Новое поле
+        "E-mail поставщика": email,
         "Статус поставщика": "Активен",
         "Наименование контракта": contract_title,
         "Вид работ (классификация)": classify_work_type(contract_title),
@@ -101,7 +102,7 @@ def parse_contract_card(page, card_url, contract_title):
         "Ссылка на карточку контракта": card_url,
     }
 
-# --- ИНТЕРФЕЙС СТРАНИЦЫ ---
+# --- ИНТЕРФЕЙС СТРАНИЦЫ СТРИМЛИТ ---
 urls_input = st.text_area(
     "Вставьте URL ссылок результатов поиска (каждая ссылка с новой строки):",
     height=200,
@@ -115,7 +116,7 @@ if st.button("🚀 Начать сбор данных", type="primary"):
         st.warning("⚠️ Пожалуйста, добавьте хотя бы одну ссылку.")
     else:
         output = io.StringIO()
-        output.write('\ufeff') # Записываем BOM для корректного отображения кириллицы в Excel
+        output.write('\ufeff') # BOM для корректного отображения кириллицы в Excel
         writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, delimiter=";")
         writer.writeheader()
 
